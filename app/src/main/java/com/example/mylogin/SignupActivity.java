@@ -1,38 +1,65 @@
 package com.example.mylogin;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-
-
-
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignupActivity extends AppCompatActivity {
+
+    EditText signupFullName, signupEmail, signupPassword;
+    TextView loginRedirectText;
+    Button signupButton;
+    FirebaseDatabase database;
+    DatabaseReference reference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        EditText etEmail = findViewById(R.id.etEmail);
-        EditText etPassword = findViewById(R.id.etPassword);
-        EditText etFullName = findViewById(R.id.etFullName);
-        Button btnSignup = findViewById(R.id.btnSignup);
+        signupFullName = findViewById(R.id.etFullName);
+        signupEmail = findViewById(R.id.etEmail);
+        signupPassword = findViewById(R.id.etPassword);
+        loginRedirectText = findViewById(R.id.btnSignup);
+        signupButton = findViewById(R.id.btnSignup);
 
-        btnSignup.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-            String fullName = etFullName.getText().toString().trim();
+        signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-            if (email.isEmpty() || password.isEmpty() || fullName.isEmpty()) {
-                Toast.makeText(SignupActivity.this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(SignupActivity.this, "Signup Successful!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(SignupActivity.this, MainProductActivity.class);
+                database = FirebaseDatabase.getInstance();
+                reference = database.getReference("users");
+
+                String FullName = signupFullName.getText().toString();
+                String email = signupEmail.getText().toString();
+                String password = signupPassword.getText().toString();
+
+
+                HelperClass helperClass = new HelperClass(FullName, email, password);
+                String safeEmail = email.replace(".", "_").replace("@", "_");
+                reference.child(safeEmail).setValue(helperClass);
+
+
+                Toast.makeText(SignupActivity.this, "You have signup successfully!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
                 startActivity(intent);
-                finish();
+            }
+        });
+
+        loginRedirectText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+                startActivity(intent);
             }
         });
     }
